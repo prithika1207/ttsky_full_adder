@@ -1,10 +1,12 @@
 import cocotb
 from cocotb.triggers import Timer
 
+
 @cocotb.test()
 async def test_fulladder(dut):
-    dut._log.info("Starting Gate-Level Hardened Simulation...")
+    dut._log.info("Starting Full Adder Test")
 
+    # Initialize inputs
     dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
@@ -14,31 +16,35 @@ async def test_fulladder(dut):
     dut.rst_n.value = 1
     await Timer(50, unit="ns")
 
+    # Test cases: (a, b, cin, expected_sum, expected_carry)
     test_cases = [
-        (0,0,0,0,0),
-        (1,1,0,0,1),
-        (1,1,1,1,1),
-        (1,0,0,1,0),
-        (0,1,0,1,0),
+        (0, 0, 0, 0, 0),
+        (0, 0, 1, 1, 0),
+        (0, 1, 0, 1, 0),
+        (0, 1, 1, 0, 1),
+        (1, 0, 0, 1, 0),
+        (1, 0, 1, 0, 1),
+        (1, 1, 0, 0, 1),
+        (1, 1, 1, 1, 1),
     ]
 
-    for a, b, c, e_sum, e_carry in test_cases:
-        dut.ui_in.value = (c << 2) | (b << 1) | a
+    for a, b, cin, exp_sum, exp_carry in test_cases:
+
+        # Apply inputs
+        dut.ui_in.value = (cin << 2) | (b << 1) | a
+
         await Timer(20, unit="ns")
 
-        try:
-            output_val = int(dut.uo_out.value)
-            actual_sum = output_val & 1
-            actual_carry = (output_val >> 1) & 1
+        # Read output
+        output = int(dut.uo_out.value)
 
-            assert actual_sum == e_sum, f"Sum Error: A={a} B={b} C={c}"
-            assert actual_carry == e_carry, f"Carry Error: A={a} B={b} C={c}"
+        actual_sum = output & 0x1
+        actual_carry = (output >> 1) & 0x1
 
-            dut._log.info(
-                f"Input: {a},{b},{c} -> Sum: {actual_sum}, Carry: {actual_carry} [PASS]"
-            )
+        # Check results
+        assert actual_sum == exp_sum, f"SUM FAIL: a={a} b={b} cin={cin}"
+        assert actual_carry == exp_carry, f"CARRY FAIL: a={a} b={b} cin={cin}"
 
-        except ValueError:
-            dut._log.info(f"Logic error: uo_out is {str(dut.uo_out.value)}")
-            raise
-  
+        dut._log.info(
+            f"PASS: a={a} b={b} cin={cin} -> sum={actual_sum}, carry={actual_carry}"
+        )
