@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_full_adder (
+module tt_um_fulladder (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
@@ -18,14 +18,11 @@ module tt_um_full_adder (
     // Full adder logic
     assign uo_out[0] = a ^ b ^ cin;
     assign uo_out[1] = (a & b) | (b & cin) | (a & cin);
-
-    // unused bits
     assign uo_out[7:2] = 6'b000000;
 
     assign uio_out = 8'b00000000;
     assign uio_oe  = 8'b00000000;
 
-    // prevent warnings
     wire _unused = &{ena, clk, rst_n, uio_in};
 
 endmodule
