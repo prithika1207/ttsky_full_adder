@@ -19,19 +19,27 @@ async def test_full_adder(dut):
     await Timer(50,unit="ns")
     dut.rst_n.value = 1
     await Timer (50,unit = "ns")
-
-    dut._log.info("Test project behavior")
+    test_cases = [
+               (0,0,0,0,0)
+               (1,1,0,0,1)
+               (1,1,1,1,1)
+               (1,0,0,1,0)
+               (0,1,0,1,0)
+    ]
 
     # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+    for a,b,c,e_sum,e_carry in test_cases:
+        dut.ui_in.value = (c << 2) | (b << 1) | a
+        await Timer (20, units = "ns")
+        try:
+            output_val1 = int(dut.uo_out.value)
+            actual_sum = output_val & 1 
+            actual_carry = (output_val >> 1) & 1
+            assert actual_sum == e_sum, f"sum Error: A={a} B={b} C={c}"
+            assert actual_carry == e_carry, f"carry Error: A={a} B={b} C={c}"
+            dut._log.info(f"Input: {a},{b},{c} -> Sum: {actual_sum}, Carry: {actual_carry} [PASS]")
+        except ValueError:
+            dut._log.info(f"Logic error: uo_out is {str(dut.uo_out.value)}")
+            raise
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+  
