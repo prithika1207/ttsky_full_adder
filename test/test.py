@@ -2,7 +2,7 @@ import cocotb
 from cocotb.triggers import Timer
 
 @cocotb.test()
-async def test_full_adder(dut):
+async def test_fulladder(dut):
     dut._log.info("Starting Gate-Level Hardened Simulation...")
 
     dut.ena.value = 1
