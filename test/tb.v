@@ -28,7 +28,7 @@ module tb ();
    `endif
 
   // Replace tt_um_example with your module name:
-  tt_um_full_adder user_project (
+  tt_um_fulladder user_project (
      `ifdef GL_TEST
      .VPWR(VPWR),
      .VGND(VGND),
